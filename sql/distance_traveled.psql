@@ -1,4 +1,4 @@
-EXPLAIN SELECT 
+SELECT 
 	route_id,
 	pStop_id,
 	pStop.stop_name AS pStop_name,
@@ -12,8 +12,7 @@ EXPLAIN SELECT
 	) AS dist_2
 
 FROM (
-	SELECT 
-	DISTINCT
+	SELECT DISTINCT
 		SUBSTRING(
 			pSequence.trip_id,
 			STRPOS(
@@ -38,15 +37,16 @@ FROM (
 
 	pSequence.shape_dist_traveled - sSequence.shape_dist_traveled AS dist_1
 
-FROM "YT-GTFS".gtfs.stop_times AS pSequence
+	FROM "YT-GTFS".gtfs.stop_times AS pSequence
 
-INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence
-	ON pSequence.trip_id = sSequence.trip_id 
-	AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
-ORDER BY dist_1
+	INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence
+		ON pSequence.trip_id = sSequence.trip_id 
+		AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
+
+	ORDER BY dist_1
 )
 INNER JOIN "YT-GTFS".gtfs.stops AS pStop
 	ON pStop_id = pStop.stop_id
 
 INNER JOIN "YT-GTFS".gtfs.stops AS sStop
-ON sStop_id = sStop.stop_id
+	ON sStop_id = sStop.stop_id
