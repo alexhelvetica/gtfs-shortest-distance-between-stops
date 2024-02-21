@@ -1,52 +1,111 @@
 SELECT 
-	route_id,
-	pStop_id,
-	pStop.stop_name AS pStop_name,
-	sStop_id,
-	sStop.stop_name AS sStop_name,
+	pTrip_id
+-- ,	route_short_name,
+,	shape_id AS pShape_id
 
-	dist_1,
-	ST_Distance(
-		ST_MakePoint(pStop.stop_lat, pStop.stop_lon)::Geography,
-		ST_MakePoint(sStop.stop_lat, sStop.stop_lon)::Geography
+,	pStop_id
+,	pStop_name
+,	pStop_lat
+,	pStop_lon
+-- ,	pStop_geography
+
+,	sStop_id
+,	sStop_name
+,	sStop_lat
+,	sStop_lon
+-- ,	sStop_geography
+
+,	dist_1
+,	ST_Distance(
+		pStop_geography,
+		sStop_geography
 	) AS dist_2
 
+,	pLine.lpSequence AS plpSequence
+,	pLine.lpLat AS plpLat
+,	pLine.lpLon AS plpLon
+
+,	pLine.lsSequence AS plsSquence
+,	pLine.lsLat AS plsLat
+,	pLine.lsLon AS plsLon
+
+,	sLine.lpSequence AS slpSequence
+,	sLine.lpLat AS slpLat
+,	sLine.lpLon AS slpLon
+
+,	sLine.lsSequence AS slsSequence
+,	sLine.lsLat AS slsLat
+,	sLine.lsLon AS slsLon
+
 FROM (
-	SELECT DISTINCT
-		SUBSTRING(
-			pSequence.trip_id,
-			STRPOS(
-				pSequence.trip_id,
-					'-'
-				) + 1,
-				STRPOS(
-					SUBSTRING(
-						pSequence.trip_id,
-						STRPOS(
-							pSequence.trip_id,
-							'-'
-						) + 1,
-						10
-					),
-					'-'
-				) - 1
-		) AS route_id,
+	SELECT 
+		trip_id AS pTrip_id
+	-- ,	route_short_name
 
-	pSequence.stop_id AS pStop_id,
-	sSequence.stop_id AS sStop_id, 
+	,	pStop_id
+	,	pStop.stop_name AS pStop_name
+	,	pStop.stop_lat AS pStop_lat
+	,	pStop.stop_lon AS pStop_lon
+	,	ST_MakePoint(pStop.stop_lat, pStop.stop_lon)::Geography AS pStop_geography
 
-	pSequence.shape_dist_traveled - sSequence.shape_dist_traveled AS dist_1
+	,	sStop_id
+	,	sStop.stop_name AS sStop_name
+	,	sStop.stop_lat AS sStop_lat
+	,	sStop.stop_lon AS sStop_lon
+	,	ST_MakePoint(sStop.stop_lat, sStop.stop_lon)::Geography AS sStop_geography
+		
+	,	dist_1
 
-	FROM "YT-GTFS".gtfs.stop_times AS pSequence
+	FROM (
+		SELECT 
+			DISTINCT ON (pStop_id, sStop_id)
 
-	INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence
-		ON pSequence.trip_id = sSequence.trip_id 
-		AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
+			pSequence.trip_id
+		,	pSequence.stop_id AS pStop_id
+		,	sSequence.stop_id AS sStop_id 
+		,	pSequence.shape_dist_traveled - sSequence.shape_dist_traveled AS dist_1
 
-	ORDER BY dist_1
-)
-INNER JOIN "YT-GTFS".gtfs.stops AS pStop
-	ON pStop_id = pStop.stop_id
+		--,	SUBSTRING(
+			-- 	pSequence.trip_id,
+			-- 	STRPOS(
+			-- 		pSequence.trip_id,
+			-- 			'-'
+			-- 		) + 1,
+			-- 		STRPOS(
+			-- 			SUBSTRING(
+			-- 				pSequence.trip_id,
+			-- 				STRPOS(
+			-- 					pSequence.trip_id,
+			-- 					'-'
+			-- 				) + 1,
+			-- 				10
+			-- 			),
+			-- 			'-'
+			-- 		) - 1
+			-- ) AS route_short_name,
 
-INNER JOIN "YT-GTFS".gtfs.stops AS sStop
+		FROM "YT-GTFS".gtfs.stop_times AS pSequence
+
+		INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence
+			ON pSequence.trip_id = sSequence.trip_id 
+			AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
+	)
+	INNER JOIN "YT-GTFS".gtfs.stops AS pStop
+		ON pStop_id = pStop.stop_id
+
+	INNER JOIN "YT-GTFS".gtfs.stops AS sStop
 	ON sStop_id = sStop.stop_id
+)
+
+INNER JOIN "YT-GTFS".gtfs.trips AS Trips
+	ON Trips.trip_id = pTrip_id
+
+LEFT JOIN shape_line AS pLine
+	ON pLine.lshape_id = Trips.shape_id
+	AND true = ST_DWithin(pStop_geography , pLine.lLine, 5, true)
+
+LEFT JOIN shape_line AS sLine
+	ON sLine.lshape_id = Trips.shape_id
+	AND true = ST_DWithin(sStop_geography , sLine.lLine, 5, true)
+
+ORDER BY dist_1, dist_2;
