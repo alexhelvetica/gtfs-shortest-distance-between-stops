@@ -1,0 +1,25 @@
+DROP TABLE IF EXISTS  shape_line;
+
+SELECT 
+	pShapePosition.shape_id AS lshape_id,
+	
+	pShapePosition.shape_pt_sequence AS lpSequence,
+	pShapePosition.shape_pt_lat AS lpLat,
+	pShapePosition.shape_pt_lon lpLon,
+		
+	sShapePosition.shape_pt_sequence AS lsSequence,
+	sShapePosition.shape_pt_lat AS lsLat,
+	sShapePosition.shape_pt_lon AS lsLon,
+
+	ST_MakeLine( 
+		ST_MakePoint(pShapePosition.shape_pt_lat, pShapePosition.shape_pt_lon),
+		ST_MakePoint(sShapePosition.shape_pt_lat, sShapePosition.shape_pt_lon)
+	)::Geography AS lLine
+
+INTO shape_line
+FROM "YT-GTFS".gtfs.shapes as pShapePosition
+INNER JOIN "YT-GTFS".gtfs.shapes  as sShapePosition
+	ON pShapePosition.shape_id = sShapePosition.shape_id
+	AND pShapePosition.shape_pt_sequence - 1 = sShapePosition.shape_pt_sequence; 
+
+
