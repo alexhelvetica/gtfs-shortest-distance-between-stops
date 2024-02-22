@@ -1,0 +1,33 @@
+-------------------------------------------------------------------------------
+-- Author       Alex Helvetica
+-- Created      2023-02-22
+-- Purpose      A view to return the number of distinct shapes per route. 
+--          Note, this isn't exact, as it is possible that a route has multiple
+--          shapes with the same amount of points, that aren't identical
+--              
+-------------------------------------------------------------------------------
+-- Modification History
+--
+-- 20xx-xx-xx  [name]  
+--      A comprehensive description of the changes. The description may use as 
+--      many lines as needed.
+-------------------------------------------------------------------------------
+;
+
+DROP VIEW IF EXISTS gtfs.v_shape_distinct_point_count;
+
+CREATE VIEW
+  gtfs.v_shape_distinct_point_count AS
+SELECT
+  COUNT(*) AS count_distinct_x_points
+, route_short_name
+, direction
+FROM
+  gtfs.v_shape_x_point_count
+GROUP BY
+  route_short_name
+, direction
+ORDER BY
+  count_distinct_x_points DESC
+, route_short_name
+, direction;
