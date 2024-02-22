@@ -1,0 +1,41 @@
+-------------------------------------------------------------------------------
+-- Author       Alex Helvetica
+-- Created      2023-02-22
+-- Purpose      A view to return the amounts of points per GTFS Shape
+--              
+-------------------------------------------------------------------------------
+-- Modification History
+--
+-- 20xx-xx-xx  [name]  
+--      A comprehensive description of the changes. The description may use as 
+--      many lines as needed.
+-------------------------------------------------------------------------------
+;
+
+DROP VIEW IF EXISTS gtfs.v_shape_point_count;
+
+CREATE VIEW
+  gtfs.v_shape_point_count AS
+SELECT
+  "shape_id"
+, COUNT(*) AS count_point
+, SUBSTRING(
+    shape_id
+  , STRPOS(shape_id, '-') + 1
+  , STRPOS(
+      SUBSTRING(shape_id, STRPOS(shape_id, '-') + 1, 10)
+    , '-'
+    ) - 1
+  )::INT AS route_short_name
+, SUBSTRING(
+    shape_id
+  , STRPOS(shape_id, '.') + STRPOS(
+      SUBSTRING(shape_id, STRPOS(shape_id, '.') + 1, 10)
+    , '.'
+    ) + 1
+  , 10
+  ) AS direction
+FROM
+  "gtfs"."shapes"
+GROUP BY
+  shape_id;
