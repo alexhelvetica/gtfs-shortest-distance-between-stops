@@ -1,0 +1,53 @@
+-------------------------------------------------------------------------------
+-- Author       Alex Helvetica
+-- Created      2023-02-23
+-- Purpose      This view joins on the stops tables to v_distance_traveled_base
+--          This provides with stop name, lat, lon and geography.
+--          It calculates the birds eye distance between the 2 stops
+--              
+-------------------------------------------------------------------------------
+-- Modification History
+--
+-- 20-xx-xx  [name]  
+--      A comprehensive description of the changes. The description may use as 
+--      many lines as needed.
+-------------------------------------------------------------------------------
+;
+
+DROP VIEW IF EXISTS gtfs.v_distance_traveled_between_stops;
+
+CREATE VIEW
+  gtfs.v_distance_traveled_between_stops AS
+SELECT
+  trip_id
+, shape_id
+, route_short_name
+, DTB.direction
+, count_point
+, dist_1
+, ST_Distance (
+    pStop.the_geom::Geography
+  , sStop.the_geom::Geography
+  ) AS dist_2
+  -- primary stop
+
+, pStop_id
+, pStop_sequence
+, pStop.stop_name AS pStop_name
+, pStop.stop_lat AS pStop_lat
+, pStop.stop_lon AS pStop_lon
+, pStop.the_geom AS pStop_geom
+  -- , ST_MakePoint (pStop.stop_lat, pStop.stop_lon)::Geography AS pStop_geography
+  -- second ary stop
+
+, sStop_id
+, sStop_sequence
+, sStop.stop_name AS sStop_name
+, sStop.stop_lat AS sStop_lat
+, sStop.stop_lon AS sStop_lon
+, sStop.the_geom AS sStop_geom
+  -- , ST_MakePoint (sStop.stop_lat, sStop.stop_lon)::Geography AS sStop_geography
+FROM
+  "YT-GTFS".gtfs.v_distance_traveled_base AS DTB
+  INNER JOIN "YT-GTFS".gtfs.stops AS pStop ON pStop_id = pStop.stop_id
+  INNER JOIN "YT-GTFS".gtfs.stops AS sStop ON sStop_id = sStop.stop_id
