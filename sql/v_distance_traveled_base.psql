@@ -7,39 +7,38 @@
 -------------------------------------------------------------------------------
 -- Modification History
 --
--- 20xx-xx-xx  [name]  
---      A comprehensive description of the changes. The description may use as 
---      many lines as needed.
+-- 2023-02-23  Alex Helvetica  
+--      Removed a variable that wasn't was used for testing, and is unneeded 
+--      
 -------------------------------------------------------------------------------
 ;
 
 DROP VIEW IF EXISTS gtfs.v_distance_traveled_base;
 
 CREATE VIEW
-    gtfs.v_distance_traveled_base AS
+  gtfs.v_distance_traveled_base AS
 SELECT DISTINCT
-    ON (
-        pStop_id
-      , sStop_id
-      , route_short_name
-      , direction
-      , count_point
-        --   , dist_1
-    ) pSequence.trip_id
-  , shapeCount.shape_id
+  ON (
+    pStop_id
+  , sStop_id
   , route_short_name
-  , shapeCount.direction
-  , trips.direction_id AS tripsd
+  , direction
   , count_point
-  , pSequence.stop_id AS pStop_id
-  , pSequence.stop_sequence AS pStop_sequence
-  , sSequence.stop_id AS sStop_id
-  , sSequence.stop_sequence AS sStop_sequence
-  , pSequence.shape_dist_traveled - sSequence.shape_dist_traveled AS dist_1
+    --   , dist_1
+  ) pSequence.trip_id
+, shapeCount.shape_id
+, route_short_name
+, shapeCount.direction
+, count_point
+, pSequence.stop_id AS pStop_id
+, pSequence.stop_sequence AS pStop_sequence
+, sSequence.stop_id AS sStop_id
+, sSequence.stop_sequence AS sStop_sequence
+, pSequence.shape_dist_traveled - sSequence.shape_dist_traveled AS dist_1
 FROM
-    "YT-GTFS".gtfs.stop_times AS pSequence
-    INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence ON pSequence.trip_id = sSequence.trip_id
-    AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
-    INNER JOIN "YT-GTFS".gtfs.trips AS trips ON pSequence.trip_id = trips.trip_id
-    INNER JOIN "YT-GTFS".gtfs.v_shape_point_count AS shapeCount ON trips.shape_id = shapeCount.shape_id
-    -- ORDER BY route_short_name, pstop_id
+  "YT-GTFS".gtfs.stop_times AS pSequence
+  INNER JOIN "YT-GTFS".gtfs.stop_times AS sSequence ON pSequence.trip_id = sSequence.trip_id
+  AND pSequence.stop_sequence - 1 = sSequence.stop_sequence
+  INNER JOIN "YT-GTFS".gtfs.trips AS trips ON pSequence.trip_id = trips.trip_id
+  INNER JOIN "YT-GTFS".gtfs.v_shape_point_count AS shapeCount ON trips.shape_id = shapeCount.shape_id
+  -- ORDER BY route_short_name, pstop_id
