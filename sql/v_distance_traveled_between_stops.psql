@@ -37,8 +37,9 @@ SELECT
 , pStop.stop_lat AS pStop_lat
 , pStop.stop_lon AS pStop_lon
 , pStop.the_geom AS pStop_geom
+  -- , ST_MakePoint (pStop.stop_lat, pStop.stop_lon) AS pStop_geom
   -- , ST_MakePoint (pStop.stop_lat, pStop.stop_lon)::Geography AS pStop_geography
-  -- second ary stop
+  -- secondary stop
 
 , sStop_id
 , sStop_sequence
@@ -46,6 +47,7 @@ SELECT
 , sStop.stop_lat AS sStop_lat
 , sStop.stop_lon AS sStop_lon
 , sStop.the_geom AS sStop_geom
+  -- , ST_MakePoint (sStop.stop_lat, sStop.stop_lon) AS sStop_geom
   -- , ST_MakePoint (sStop.stop_lat, sStop.stop_lon)::Geography AS sStop_geography
 FROM
   "YT-GTFS".gtfs.v_distance_traveled_base AS DTB
