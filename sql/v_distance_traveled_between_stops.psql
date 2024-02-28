@@ -36,8 +36,8 @@ SELECT
 , pStop.stop_name AS pStop_name
 , pStop.stop_lat AS pStop_lat
 , pStop.stop_lon AS pStop_lon
-, pStop.the_geom AS pStop_geom
-  -- , ST_MakePoint (pStop.stop_lat, pStop.stop_lon) AS pStop_geom
+-- , pStop.the_geom AS pStop_geom
+  , ST_MakePoint (pStop.stop_lat, pStop.stop_lon) AS pStop_geom
   -- , ST_MakePoint (pStop.stop_lat, pStop.stop_lon)::Geography AS pStop_geography
   -- secondary stop
 
@@ -46,10 +46,11 @@ SELECT
 , sStop.stop_name AS sStop_name
 , sStop.stop_lat AS sStop_lat
 , sStop.stop_lon AS sStop_lon
-, sStop.the_geom AS sStop_geom
-  -- , ST_MakePoint (sStop.stop_lat, sStop.stop_lon) AS sStop_geom
+-- , sStop.the_geom AS sStop_geom
+  , ST_MakePoint (sStop.stop_lat, sStop.stop_lon) AS sStop_geom
   -- , ST_MakePoint (sStop.stop_lat, sStop.stop_lon)::Geography AS sStop_geography
 FROM
   "YT-GTFS".gtfs.v_distance_traveled_base AS DTB
   INNER JOIN "YT-GTFS".gtfs.stops AS pStop ON pStop_id = pStop.stop_id
   INNER JOIN "YT-GTFS".gtfs.stops AS sStop ON sStop_id = sStop.stop_id
+  -- ORDER BY trip_id
