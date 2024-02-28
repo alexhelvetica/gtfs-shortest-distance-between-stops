@@ -1,0 +1,47 @@
+-------------------------------------------------------------------------------
+-- Author       Alex Helvetica
+-- Created      2023-02-23
+-- Purpose      A vview to return each line segment in a shape.
+--              
+-------------------------------------------------------------------------------
+-- Modification History
+--
+-- 20xx-xx-xx  [name]  
+--      A comprehensive description of the changes. The description may use as 
+--      many lines as needed.
+-------------------------------------------------------------------------------
+;
+
+DROP VIEW IF EXISTS gtfs.v_shape_line;
+
+CREATE VIEW
+  gtfs.v_shape_line AS
+SELECT
+  pShapePosition.shape_id AS lshape_id
+, pShapePosition.shape_pt_sequence AS lpSequence
+, pShapePosition.shape_pt_lat AS lpLat
+, pShapePosition.shape_pt_lon lpLon
+, sShapePosition.shape_pt_sequence AS lsSequence
+, sShapePosition.shape_pt_lat AS lsLat
+, sShapePosition.shape_pt_lon AS lsLon
+, (
+    pShapePosition.shape_pt_lat + sShapePosition.shape_pt_lat
+  ) / 2 AS apLat
+, (
+    pShapePosition.shape_pt_lon + sShapePosition.shape_pt_lon
+  ) / 2 AS apLon
+  -- , ST_MakeLine (
+  --     ST_MakePoint (
+  --       pShapePosition.shape_pt_lat
+  --     , pShapePosition.shape_pt_lon
+  --     )
+  --   , ST_MakePoint (
+  --       sShapePosition.shape_pt_lat
+  --     , sShapePosition.shape_pt_lon
+  --     )
+  --   )::Geography AS lLine
+  -- INTO shape_line
+FROM
+  "YT-GTFS".gtfs.shapes AS pShapePosition
+  INNER JOIN "YT-GTFS".gtfs.shapes AS sShapePosition ON pShapePosition.shape_id = sShapePosition.shape_id
+  AND pShapePosition.shape_pt_sequence - 1 = sShapePosition.shape_pt_sequence;
